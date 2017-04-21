@@ -272,7 +272,7 @@ class ArticlesApiResourceArticle extends ApiResource
 			$article = JTable::getInstance('content');
 			$article->title = $app->input->get('title', '', 'STRING');
 			$article->alias = $app->input->get('alias', '', 'STRING');
-			$article->introtext = $app->input->get('introtext', '', 'STRING');
+            $article->introtext = rawurldecode($app->input->get('introtext', '', 'STRING'));
 			$article->fulltext = $app->input->get('fulltext', '', 'STRING');
 			$article->state = $app->input->get('state', '', 'INT');
 			$article->catid = $app->input->get('catid', '', 'INT');
