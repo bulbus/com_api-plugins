@@ -8,6 +8,10 @@
 defined('_JEXEC') or die( 'Restricted access' );
 require_once JPATH_SITE . '/components/com_content/models/articles.php';
 require_once JPATH_SITE . '/components/com_content/models/article.php';
+require_once JPATH_SITE . '/plugins/api/articles/articles/helper/articleextractor.php';
+
+
+
 
 /**
  * Articles Resource
@@ -269,10 +273,13 @@ class ArticlesApiResourceArticle extends ApiResource
 		}
 		else
 		{
+			$attachments = $app->input->get('attachmentJson', '', 'STRING');
+			$mailBody = rawurldecode($app->input->get('introtext', '', 'STRING'));
+			$formattedArticle = formatArticle($mailBody, $attachments);
 			$article = JTable::getInstance('content');
 			$article->title = $app->input->get('title', '', 'STRING');
 			$article->alias = $app->input->get('alias', '', 'STRING');
-            $article->introtext = rawurldecode($app->input->get('introtext', '', 'STRING'));
+			$article->introtext = $formattedArticle;
 			$article->fulltext = $app->input->get('fulltext', '', 'STRING');
 			$article->state = $app->input->get('state', '', 'INT');
 			$article->catid = $app->input->get('catid', '', 'INT');
