@@ -11,6 +11,9 @@ defined('_JEXEC') or die('Restricted access');
 
 const emailSignature = "Note in ottemperanza al Decreto Legislativo 196/2003";
 const articleOrizontalWidth = "570px";
+const liElementClass = "auto-publisher-attachment-li";
+const ulElementClass = "auto-publisher-attachment-ul";
+
 
 /**
 *Funzione che ritorna la classe di icone font awesome per la lista di allegati
@@ -51,11 +54,11 @@ function getFileIcon($fileExt){
 */
 function getLiElement($dom, $attachmentName, $attachmentLink, $fileExt){
   $liElement = $dom->createElement('li');
-  $liElement->setAttribute('style',"list-style-type: none;");
+  $liElement->setAttribute('class', liElementClass);
   $iElement = $dom->createElement('i');
   $iElement->setAttribute('class', 'fa ' . getFileIcon($fileExt));
   $liElement->appendChild($iElement);
-  $aElement = $dom->createElement('a', ' ' . $attachmentName);
+  $aElement = $dom->createElement('a', '' . $attachmentName);
   $aElement->setAttribute('href', $attachmentLink);
   $iElement->appendChild($aElement);
   return $liElement;
@@ -74,13 +77,14 @@ function addAttacchmentsListToHtml(DOMDocument $dom, $attachmentsJson){
   $child = $xpath->query("//body/*[1]");
   $body = $dom->getElementsByTagName('body')[0];
   $ulList = $dom->createElement('ul');
+  $ulList ->setAttribute('class', ulElementClass);
   $firstImage = true;
   foreach ($attachmentsJson as $attachmentName => $attachmentLink) {
     $fileExt = substr($attachmentName, strrpos($attachmentName, '.')+1);
     if(($fileExt=="png" || $fileExt=="jpeg" || $fileExt=="jpg") && $firstImage===true){
       $imgElement = $dom->createElement('img');
       $imgElement->setAttribute('src', $attachmentLink);
-      $imgElement->setAttribute('style','display: block; width:100%;margin: 10px auto; max-width:'.articleOrizontalWidth);
+      $imgElement->setAttribute('style','display: block; width:100%;margin: 10px auto;');
       $parent->item(0)->insertBefore($imgElement, $child->item(0));
       $firstImage = false;
     }
@@ -149,6 +153,25 @@ function fixTables($dom){
   }
 }
 
+function addMeta($dom){
+  $metaElement = $dom->createElement('meta');
+  $metaElement->setAttribute("http-equiv","content-type");
+  $metaElement->setAttribute("content","text/html; charset=utf-8");
+  if($dom->getElementsByTagName('head')->length>0){
+    $head = $dom->getElementsByTagName('head')->item(0);
+    if ($head->getElementsByTagName('meta')->length>0) {
+      return;
+    }
+    $firstChild = $head->childNodes->item(0);
+    $head->insertBefore($metaElement,$firstChild);
+  } else {
+    $head = $dom->createElement('head');
+    $head->appendChild($metaElement);
+    $html = $dom->getElementsByTagName('html')->item(0);
+    $firstChild = $html->childNodes->item(0);
+    $html->insertBefore($head,$firstChild);
+  }
+}
 /**
 *funzione che chiama i metodi per adattare l'html o plain-text ricevuto alla
 *pubblicazione in un articolo Joomla
@@ -158,22 +181,25 @@ function fixTables($dom){
 */
 function formatArticle($mailBody, $attachmentsJsonString)
 {
-    $DOM = new DOMDocument();
-    $DOM->loadHTML($mailBody);
+  $DOM = new DOMDocument();
+
+    $DOM->loadHTML(mb_convert_encoding($mailBody, 'HTML-ENTITIES', 'UTF-8'));
+    addMeta($DOM);
     $attachmentsJson = json_decode($attachmentsJsonString, true);
     removeImg($DOM);
     removeSignature($DOM);
     fixTables($DOM);
+
     addAttacchmentsListToHtml($DOM, $attachmentsJson);
 
-    return $DOM->saveHTML($DOM);
+    return $DOM->saveHTML($DOM->getElementsByTagName('html')->item(0));
+
 }
 
 
 
 
-
- $emailBody = '<html> <head> <meta http-equiv="content-type" content="text/html; charset=iso-8859-15"> </head> <body bgcolor="#FFFFFF" text="#000000"> <p>Tutti i volontari riceveranno 1000� al mese a partire da Aprile.<br> Come pu� confermare l\'admin del sito:<br> <img src="cid:part1.1A92D8FC.7DA4FB5B@cricasatenovo.it" alt=""><br> </p> <pre class="moz-signature" cols="72">-- WebMaster - CRI Casatenovo <a class="moz-txt-link-abbreviated" href="http://www.cricasatenovo.it">www.cricasatenovo.it</a> Facebook <a class="moz-txt-link-abbreviated" href="http://www.facebook.com/cricasatenovo">www.facebook.com/cricasatenovo</a> Twitter <a class="moz-txt-link-abbreviated" href="http://www.twitter.com/@cricasatenovo">www.twitter.com/@cricasatenovo</a> Youtube <a class="moz-txt-link-abbreviated" href="http://www.youtube.com/cricasate">www.youtube.com/cricasate</a> Note in ottemperanza al Decreto Legislativo 196/2003 sulla Tutela dei Dati Personali: il presente messaggio e gli eventuali allegati sono rivolti unicamente all\'attenzione del destinatario ed il relativo contenuto potrebbe avere carattere riservato e ne � vietata la diffusione in qualunque modo eseguita. Nel caso in cui aveste ricevuto questa mail per errore, Vi invitiamo ad avvertire il mittente al pi� presto a mezzo posta elettronica e a distruggere il messaggio erroneamente ricevuto.</pre> </body> </html>';
+ $emailBody = '<html><head><meta http-equiv="Content-Type" content="text/html charset=utf-8"></head><body style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;" class=""><p style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class="">Ciao a tutti di seguito il calendario per il servizio provette, date un occhio in modo tale che se avete delle modifiche da fare le mettiamo prima di appendere la turnazione definitiva</p><p style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class=""><br class=""></p><p style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class="">Grazie mille</p><p style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class=""><br class=""></p><p style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class=""><br class=""></p><table width="927" style="font-family: Verdana, Geneva, sans-serif;" class=""><tbody class=""><tr class=""><td width="86" class="">Cognome</td><td width="116" class="">Nome</td><td width="218" class="">Cellulare</td><td width="229" class="">Turno Nome</td><td width="138" class="">Turno Inizio</td><td width="140" class="">Turno Fine</td></tr><tr class=""><td class="">Redaelli</td><td class="">Francesca</td><td class="">348 581 5620</td><td class="">Trasporto provette su chiamata</td><td class="">06/05/2017 10.00</td><td class="">06/05/2017 11.30</td></tr><tr class=""><td class="">Bonsanto</td><td class="">Fabio</td><td class="">333 398 7235</td><td class="">Trasporto provette su chiamata</td><td class="">13/05/2017 10.00</td><td class="">13/05/2017 11.30</td></tr><tr class=""><td class="">Rosano</td><td class="">Nicola</td><td class="">339 219 5310</td><td class="">Trasporto provette su chiamata</td><td class="">20/05/2017 10.00</td><td class="">20/05/2017 11.30</td></tr><tr class=""><td class="">Pozzi</td><td class="">Enrico Giovanni</td><td class="">333 252 1245</td><td class="">Trasporto provette su chiamata</td><td class="">27/05/2017 10.00</td><td class="">27/05/2017 11.30</td></tr><tr class=""><td class="">Mantonico</td><td class="">Alfredo</td><td class="">347 830 3201</td><td class="">Trasporto provette su chiamata</td><td class="">03/06/2017 10.00</td><td class="">03/06/2017 11.30</td></tr><tr class=""><td class="">Ghirini</td><td class="">Arnaldo</td><td class="">338 262 3987</td><td class="">Trasporto provette su chiamata</td><td class="">10/06/2017 10.00</td><td class="">10/06/2017 11.30</td></tr><tr class=""><td class="">Carnio</td><td class="">Maristella</td><td class="">349 428 0592</td><td class="">Trasporto provette su chiamata</td><td class="">17/06/2017 10.00</td><td class="">17/06/2017 11.30</td></tr><tr class=""><td class="">Bello</td><td class="">Marco</td><td class="">333 273 9878 – 039 571 39</td><td class="">Trasporto provette su chiamata</td><td class="">24/06/2017 10.00</td><td class="">24/06/2017 11.30</td></tr><tr class=""><td class="">Valnegri</td><td class="">Andrea</td><td class="">333 398 7625</td><td class="">Trasporto provette su chiamata</td><td class="">01/07/2017 10.00</td><td class="">01/07/2017 11.30</td></tr><tr class=""><td class="">Rocca</td><td class="">Valeria</td><td class="">340 577 6832</td><td class="">Trasporto provette su chiamata</td><td class="">08/07/2017 10.00</td><td class="">08/07/2017 11.30</td></tr><tr class=""><td class="">Brenna</td><td class="">Debora</td><td class="">333 945 0394</td><td class="">Trasporto provette su chiamata</td><td class="">15/07/2017 10.00</td><td class="">15/07/2017 11.30</td></tr><tr class=""><td class="">Casiraghi</td><td class="">Michele</td><td class="">339 806 5984</td><td class="">Trasporto provette su chiamata</td><td class="">22/07/2017 10.00</td><td class="">22/07/2017 11.30</td></tr><tr class=""><td class="">Bellantonio</td><td class="">Giuseppe</td><td class="">349 372 8598</td><td class="">Trasporto provette su chiamata</td><td class="">29/07/2017 10.00</td><td class="">29/07/2017 11.30</td></tr><tr class=""><td class="">Bonfanti</td><td class="">Eros</td><td class="">348515 8644</td><td class="">Trasporto provette su chiamata</td><td class="">05/08/2017 10.00</td><td class="">05/08/2017 11.30</td></tr><tr class=""><td class="">Cazzaniga</td><td class="">Matteo</td><td class="">338 615 8657</td><td class="">Trasporto provette su chiamata</td><td class="">12/08/2017 10.00</td><td class="">12/08/2017 11.30</td></tr><tr class=""><td class="">Ielpo</td><td class="">Antonio</td><td class="">339 324 4769</td><td class="">Trasporto provette su chiamata</td><td class="">19/08/2017 10.00</td><td class="">19/08/2017 11.30</td></tr><tr class=""><td class="">Villa</td><td class="">Daniela</td><td class="">333 441 3314</td><td class="">Trasporto provette su chiamata</td><td class="">26/08/2017 10.00</td><td class="">26/08/2017 11.30</td></tr></tbody></table><p style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class=""><br class=""></p><p style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class=""><br class=""></p><div style="font-family: Verdana, Geneva, sans-serif; font-size: 13.333333015441895px;" class="">--&nbsp;<br class=""><div class="pre" style="margin: 0px; padding: 0px; font-family: monospace;">Turnazione - CRI Casatenovo<br class=""><a href="http://www.cricasatenovo.it" target="_blank" rel="noreferrer" class="">www.cricasatenovo.it</a><br class=""><br class="">Facebook&nbsp;<a href="http://www.facebook.com/cricasatenovo" target="_blank" rel="noreferrer" class="">www.facebook.com/cricasatenovo</a><br class="">Twitter&nbsp;<a href="http://www.twitter.com/@cricasatenovo" target="_blank" rel="noreferrer" class="">www.twitter.com/@cricasatenovo</a><br class="">Youtube&nbsp;<a href="http://www.youtube.com/cricasate" target="_blank" rel="noreferrer" class="">www.youtube.com/cricasate</a><br class=""><br class="">Note in ottemperanza al Decreto Legislativo 196/2003 sulla Tutela dei Dati Personali: il presente messaggio è rivolto unicamente all\'attenzione del destinatario ed il relativo contenuto potrebbe avere carattere riservato; ne è vietata la diffusione in qualunque modo eseguita. Nel caso in cui aveste ricevuto questa mail per errore, Vi invitiamo ad avvertire il mittente al più presto a mezzo posta elettronica e a distruggere il messaggio erroneamente ricevuto.</div></div></body></html>';
 //
 $j = '{"nome": "link","nome2.png":"link2"}';
 echo formatArticle($emailBody, $j);
