@@ -286,6 +286,7 @@ class ArticlesApiResourceArticle extends ApiResource
 			$article->publish_up = $app->input->get('publish_up', '', 'STRING');
 			$article->publish_down = $app->input->get('publish_down', '', 'STRING');
 			$article->language = $app->input->get('language', '', 'STRING');
+			$article->created_by_alias = $app->input->get('created_by_alias', '', 'STRING');
 		}
 
 		// Check the data.
